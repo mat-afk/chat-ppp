@@ -72,7 +72,7 @@ const items = computed(() => []);
 
       <template #footer="{ collapsed }">
         <UButton
-          :label="collapsed ? '' : 'Sign in with Google'"
+          :label="collapsed ? '' : 'Login'"
           icon="i-simple-icons-google"
           color="neutral"
           variant="ghost"
