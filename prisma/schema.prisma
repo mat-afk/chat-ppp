@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../output/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Performer {
+  id Int @id @default(autoincrement())
+  key String @unique
+  createdAt DateTime @default(now())
+
+  chats Chat[]
+
+  @@map("performers")
+}
+
+model Guest {
+  id Int @id @default(autoincrement())
+  sessionToken String @unique
+  createdAt DateTime @default(now())
+
+  chats Chat[]
+
+  @@map("guests")
+}
+
+model Chat {
+  id String @id @default(uuid())
+  status ChatStatus @default(WAITING)
+  createdAt DateTime @default(now())
+  assumedAt DateTime?
+
+  guestId Int
+  guest Guest @relation(fields: [guestId], references: [id])
+
+  performerId Int?
+  performer Performer? @relation(fields: [performerId], references: [id])
+
+  messages Message[]
+
+  @@index([status])
+  @@index([guestId])
+  @@index([performerId])
+
+  @@map("chats")
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+  content String
+  sender MessageSender
+  sentAt DateTime @default(now())
+
+  chatId String
+  chat Chat @relation(fields: [chatId], references: [id])
+
+  @@index([chatId, sentAt])
+
+  @@map("messages")
+}
+
+enum MessageSender {
+  GUEST
+  PERFORMER
+}
+
+enum ChatStatus {
+  WAITING
+  IN_PROGRESS
+}
