@@ -1114,6 +1114,7 @@ export type PerformerCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many Performers.
    */
   data: Prisma.PerformerCreateManyInput | Prisma.PerformerCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1132,6 +1133,7 @@ export type PerformerCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many Performers.
    */
   data: Prisma.PerformerCreateManyInput | Prisma.PerformerCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**

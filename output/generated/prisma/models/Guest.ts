@@ -1096,6 +1096,7 @@ export type GuestCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * The data used to create many Guests.
    */
   data: Prisma.GuestCreateManyInput | Prisma.GuestCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1114,6 +1115,7 @@ export type GuestCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many Guests.
    */
   data: Prisma.GuestCreateManyInput | Prisma.GuestCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**

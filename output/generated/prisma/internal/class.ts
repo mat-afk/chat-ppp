@@ -23,7 +23,7 @@ const config: runtime.GetPrismaClientConfig = {
       "value": "prisma-client"
     },
     "output": {
-      "value": "A:\\Documentos\\mateus\\coding\\chat\\output\\generated\\prisma",
+      "value": "A:\\Documentos\\mateus\\coding\\chat-ppp\\output\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -37,7 +37,7 @@ const config: runtime.GetPrismaClientConfig = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "A:\\Documentos\\mateus\\coding\\chat\\prisma\\schema.prisma",
+    "sourceFilePath": "A:\\Documentos\\mateus\\coding\\chat-ppp\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativePath": "../../../prisma",
@@ -46,8 +46,7 @@ const config: runtime.GetPrismaClientConfig = {
   "datasourceNames": [
     "db"
   ],
-  "activeProvider": "sqlite",
-  "postinstall": false,
+  "activeProvider": "postgresql",
   "inlineDatasources": {
     "db": {
       "url": {
@@ -56,8 +55,8 @@ const config: runtime.GetPrismaClientConfig = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../output/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Performer {\n  id        Int      @id @default(autoincrement())\n  key       String   @unique\n  createdAt DateTime @default(now())\n\n  chats Chat[]\n\n  @@map(\"performers\")\n}\n\nmodel Guest {\n  id           Int      @id @default(autoincrement())\n  sessionToken String   @unique\n  createdAt    DateTime @default(now())\n\n  chats Chat[]\n\n  @@map(\"guests\")\n}\n\nmodel Chat {\n  id        String     @id @default(uuid())\n  status    ChatStatus @default(WAITING)\n  createdAt DateTime   @default(now())\n  assumedAt DateTime?\n\n  guestId Int\n  guest   Guest @relation(fields: [guestId], references: [id])\n\n  performerId Int?\n  performer   Performer? @relation(fields: [performerId], references: [id])\n\n  messages Message[]\n\n  @@index([status])\n  @@index([guestId])\n  @@index([performerId])\n  @@map(\"chats\")\n}\n\nmodel Message {\n  id      Int           @id @default(autoincrement())\n  content String\n  sender  MessageSender\n  sentAt  DateTime      @default(now())\n\n  chatId String\n  chat   Chat   @relation(fields: [chatId], references: [id])\n\n  @@index([chatId, sentAt])\n  @@map(\"messages\")\n}\n\nenum MessageSender {\n  GUEST\n  PERFORMER\n}\n\nenum ChatStatus {\n  WAITING\n  IN_PROGRESS\n}\n",
-  "inlineSchemaHash": "c3bb90e0504efdfc1981aadb608b474b394648d262b583d13ab9703f9bde45e0",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../output/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Performer {\n  id        Int      @id @default(autoincrement())\n  key       String   @unique\n  createdAt DateTime @default(now())\n\n  chats Chat[]\n\n  @@map(\"performers\")\n}\n\nmodel Guest {\n  id           Int      @id @default(autoincrement())\n  sessionToken String   @unique\n  createdAt    DateTime @default(now())\n\n  chats Chat[]\n\n  @@map(\"guests\")\n}\n\nmodel Chat {\n  id        String     @id @default(uuid())\n  status    ChatStatus @default(WAITING)\n  createdAt DateTime   @default(now())\n  assumedAt DateTime?\n\n  guestId Int\n  guest   Guest @relation(fields: [guestId], references: [id])\n\n  performerId Int?\n  performer   Performer? @relation(fields: [performerId], references: [id])\n\n  messages Message[]\n\n  @@index([status])\n  @@index([guestId])\n  @@index([performerId])\n  @@map(\"chats\")\n}\n\nmodel Message {\n  id      Int           @id @default(autoincrement())\n  content String\n  sender  MessageSender\n  sentAt  DateTime      @default(now())\n\n  chatId String\n  chat   Chat   @relation(fields: [chatId], references: [id])\n\n  @@index([chatId, sentAt])\n  @@map(\"messages\")\n}\n\nenum MessageSender {\n  GUEST\n  PERFORMER\n}\n\nenum ChatStatus {\n  WAITING\n  IN_PROGRESS\n}\n",
+  "inlineSchemaHash": "8d0b7e50e59f2925be970675b552e17a1dba03382e54b9c955268237e8bd780c",
   "copyEngine": true,
   "runtimeDataModel": {
     "models": {},
