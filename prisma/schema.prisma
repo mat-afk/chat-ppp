@@ -30,6 +30,7 @@ model Guest {
 
 model Chat {
   id        String     @id @default(uuid())
+  title     String
   status    ChatStatus @default(WAITING)
   createdAt DateTime   @default(now())
   assumedAt DateTime?

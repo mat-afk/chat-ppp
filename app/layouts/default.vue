@@ -99,6 +99,10 @@ const items = computed(() => []);
       ]"
     />
 
-    <slot />
+    <main class="size-full flex items-center justify-center">
+      <div class="w-[90%] sm:w-[80%] lg:w-[70%]">
+        <slot />
+      </div>
+    </main>
   </UDashboardGroup>
 </template>
