@@ -18,7 +18,7 @@ const items = computed(() => []);
         <NuxtLink to="/" class="flex items-center gap-1.5">
           <Logo class="h-8 w-auto shrink-0" />
           <span v-if="!collapsed" class="text-xl font-bold text-highlighted"
-            >Chat</span
+            >ChatPPP</span
           >
         </NuxtLink>
 
@@ -32,7 +32,7 @@ const items = computed(() => []);
         <div class="flex flex-col gap-1.5">
           <UButton
             v-bind="
-              collapsed ? { icon: 'i-lucide-plus' } : { label: 'New chat' }
+              collapsed ? { icon: 'i-lucide-plus' } : { label: 'Nova conversa' }
             "
             variant="soft"
             block
@@ -71,24 +71,26 @@ const items = computed(() => []);
       </template>
 
       <template #footer="{ collapsed }">
-        <UButton
-          :label="collapsed ? '' : 'Login'"
-          icon="i-simple-icons-google"
-          color="neutral"
-          variant="ghost"
+        <UUser
+          :name="collapsed ? '' : 'Anônimo'"
+          :description="collapsed ? '' : 'Quer se juntar a nós?'"
+          :avatar="{
+            icon: 'i-lucide-user',
+          }"
+          to="/a"
           class="w-full"
         />
       </template>
     </UDashboardSidebar>
 
     <UDashboardSearch
-      placeholder="Search chats..."
+      placeholder="Procure conversas..."
       :groups="[
         {
           id: 'links',
           items: [
             {
-              label: 'New chat',
+              label: 'Nova conversa',
               to: '/',
               icon: 'i-lucide-square-pen',
             },

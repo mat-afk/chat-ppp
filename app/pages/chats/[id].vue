@@ -1,6 +1,4 @@
 <script setup lang="ts">
-const route = useRoute();
-
 const input = ref("");
 
 interface UIMessage {
@@ -19,7 +17,7 @@ const messages = ref<UIMessage[]>([
     parts: [
       {
         type: "text",
-        text: "Hello, how are you?",
+        text: "Por que '42' é a resposta do universo?",
       },
     ],
   },
@@ -29,27 +27,7 @@ const messages = ref<UIMessage[]>([
     parts: [
       {
         type: "text",
-        text: "I am doing well, thank you for asking! How can I assist you today?",
-      },
-    ],
-  },
-  {
-    id: "9c84d6a7-8b23-4f12-a1d5-e7f3b9c05e2a",
-    role: "user",
-    parts: [
-      {
-        type: "text",
-        text: "What is the current weather in Tokyo?",
-      },
-    ],
-  },
-  {
-    id: "b2e5f8c3-a1d9-4e67-b3f2-c9d8e7a6b5f4",
-    role: "assistant",
-    parts: [
-      {
-        type: "text",
-        text: "Based on the latest data, Tokyo is currently experiencing sunny weather with temperatures around 24°C (75°F). It's a beautiful day with clear skies.",
+        text: "...",
       },
     ],
   },
@@ -62,10 +40,6 @@ function handleSubmit(e: Event) {
 
 <template>
   <UDashboardPanel id="chat" class="relative" :ui="{ body: 'p-0 sm:p-0' }">
-    <template #header>
-      <DashboardNavbar />
-    </template>
-
     <template #body>
       <UContainer class="flex-1 flex flex-col gap-4 sm:gap-6">
         <UChatMessages
