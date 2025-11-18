@@ -1,9 +1,5 @@
-import z from "zod";
 import { prisma } from "~~/server/lib/prisma";
-
-const bodySchema = z.object({
-  sessionToken: z.string().optional(),
-});
+import { sessionTokenSchema } from "~~/server/lib/zod";
 
 async function getOrCreateGuest(sessionToken: string | undefined) {
   if (!sessionToken) {
@@ -20,7 +16,10 @@ async function getOrCreateGuest(sessionToken: string | undefined) {
 }
 
 export default defineEventHandler(async (event) => {
-  const { sessionToken } = await readValidatedBody(event, bodySchema.parse);
+  const { sessionToken } = await readValidatedBody(
+    event,
+    sessionTokenSchema.parse
+  );
 
   const guest = await getOrCreateGuest(sessionToken);
 
@@ -31,7 +30,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  await setUserSession(event, { id: guest.id, type: "GUEST" });
+  await setUserSession(event, { user: { id: guest.id, type: "GUEST" } });
 
   return guest;
 });

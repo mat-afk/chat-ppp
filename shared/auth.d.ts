@@ -5,6 +5,10 @@ declare module "#auth-utils" {
     id: string;
     type: SessionType;
   }
+  interface UserSession {
+    id: string;
+    user: User;
+  }
 }
 
 export {};
