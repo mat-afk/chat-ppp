@@ -41,7 +41,8 @@ model Chat {
   performerId Int?
   performer   Performer? @relation(fields: [performerId], references: [id])
 
-  messages Message[]
+  messages          Message[]
+  lastMessageSender MessageSender
 
   @@index([status])
   @@index([guestId])
