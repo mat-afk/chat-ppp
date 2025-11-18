@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import ModalConfirm from "~/components/ModalConfirm.vue";
+import ModalLogin from "~/components/ModalLogin.vue";
 import { useChats } from "~/composables/useChats";
 
+const { user } = useUserSession();
 const open = ref(false);
 
 const overlay = useOverlay();
@@ -13,6 +15,8 @@ const deleteModal = overlay.create(ModalConfirm, {
       "Você tem certeza de que quer deletar esse chat? Essa ação não pode ser desfeita.",
   },
 });
+
+const loginModal = overlay.create(ModalLogin);
 
 const { data: chats, refresh: refreshChats } = await useFetch("/api/chats", {
   key: "chats",
@@ -96,6 +100,7 @@ async function deleteChat(id: string) {
       <template #default="{ collapsed }">
         <div class="flex flex-col gap-1.5">
           <UButton
+            v-if="user && user.type === 'GUEST'"
             v-bind="
               collapsed ? { icon: 'i-lucide-plus' } : { label: 'Nova conversa' }
             "
@@ -137,13 +142,16 @@ async function deleteChat(id: string) {
       </template>
 
       <template #footer="{ collapsed }">
+        <UButton v-if="user?.type === 'PERFORMER'" />
         <UUser
+          v-else
           :name="collapsed ? '' : 'Anônimo'"
           :description="collapsed ? '' : 'Quer se juntar a nós?'"
           :avatar="{
             icon: 'i-lucide-user',
           }"
-          class="w-full"
+          class="w-full cursor-pointer"
+          @click="loginModal.open()"
         />
       </template>
     </UDashboardSidebar>

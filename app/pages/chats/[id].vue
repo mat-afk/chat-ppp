@@ -1,39 +1,63 @@
 <script setup lang="ts">
+const route = useRoute();
+const toast = useToast();
+
+const { data: chat } = await useFetch(`/api/chats/${route.params.id}`, {
+  cache: "force-cache",
+});
+
+if (!chat.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: "Chat não encontrado",
+    fatal: true,
+  });
+}
+
 const input = ref("");
 
 interface UIMessage {
   id: string;
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant";
   parts: {
     type: any;
     text: string;
   }[];
 }
 
-const messages = ref<UIMessage[]>([
-  {
-    id: "6045235a-a435-46b8-989d-2df38ca2eb47",
-    role: "user",
-    parts: [
-      {
-        type: "text",
-        text: "Por que '42' é a resposta do universo?",
-      },
-    ],
-  },
-  {
-    id: "7a92b3c1-d5f8-4e76-b8a9-3c1e5fb2e0d8",
-    role: "assistant",
-    parts: [
-      {
-        type: "text",
-        text: "...",
-      },
-    ],
-  },
-]);
+const messages = computed<UIMessage[]>(() => {
+  if (!chat.value) return [];
 
-function handleSubmit(e: Event) {
+  const messages = chat.value.messages.map<UIMessage>((message) => {
+    return {
+      id: message.id.toString(),
+      role: message.sender === "GUEST" ? "user" : "assistant",
+      parts: [
+        {
+          type: "text",
+          text: message.content,
+        },
+      ],
+    };
+  });
+
+  if (chat.value.status === "WAITING") {
+    messages.push({
+      id: "1",
+      role: "assistant",
+      parts: [
+        {
+          type: "text",
+          text: "Raciocinando...",
+        },
+      ],
+    });
+  }
+
+  return messages;
+});
+
+function onSubmit(e: Event) {
   e.preventDefault();
 }
 </script>
@@ -53,7 +77,8 @@ function handleSubmit(e: Event) {
           v-model="input"
           variant="subtle"
           class="sticky bottom-0 [view-transition-name:chat-prompt] rounded-b-none z-10"
-          @submit="handleSubmit"
+          placeholder="Escreva sua mensagem aqui..."
+          @submit="onSubmit"
         >
           <template #footer>
             <UChatPromptSubmit color="neutral" />

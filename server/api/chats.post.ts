@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const chat = await prisma.chat.create({
-    data: { title: "Novo chat", guestId: user.id, lastMessageSender: "GUEST" },
+    data: { title: "Sem título", guestId: user.id, lastMessageSender: "GUEST" },
   });
 
   await prisma.message.create({
