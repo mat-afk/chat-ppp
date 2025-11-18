@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   const where: Prisma.ChatWhereUniqueInput = { id };
 
   if (user.type === "GUEST") where.guestId = user.id;
-  else where.performerId = user.id;
+  else where.OR = [{ performerId: user.id }, { performerId: null }];
 
   const chat = await prisma.chat.findUnique({
     where,
