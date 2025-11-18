@@ -1,7 +1,72 @@
 <script setup lang="ts">
+import ModalConfirm from "~/components/ModalConfirm.vue";
+import { useChats } from "~/composables/useChats";
+
 const open = ref(false);
 
-const items = computed(() => []);
+const overlay = useOverlay();
+
+const deleteModal = overlay.create(ModalConfirm, {
+  props: {
+    title: "Deletar chat",
+    description:
+      "Você tem certeza de que quer deletar esse chat? Essa ação não pode ser desfeita.",
+  },
+});
+
+const { data: chats, refresh: refreshChats } = await useFetch("/api/chats", {
+  key: "chats",
+  transform: (data) =>
+    data.map((chat) => ({
+      ...chat,
+      id: chat.id,
+      label: chat.title || "Sem título",
+      to: `/chats/${chat.id}`,
+      icon: "i-lucide-message-circle",
+    })),
+});
+
+const { groups } = useChats(chats);
+
+const items = computed(() =>
+  groups.value?.flatMap((group) => {
+    return [
+      {
+        label: group.label,
+        type: "label" as const,
+      },
+      ...group.items.map((item) => ({
+        ...item,
+        slot: "chat" as const,
+        icon: undefined,
+        class: item.label === "Sem título" ? "text-muted" : "",
+      })),
+    ];
+  })
+);
+
+const toast = useToast();
+const route = useRoute();
+
+async function deleteChat(id: string) {
+  const instance = deleteModal.open();
+  const result = await instance.result;
+  if (!result) return;
+
+  await $fetch(`/api/chats/${id}`, { method: "DELETE" });
+
+  toast.add({
+    title: "Chat deletado",
+    description: "Seu chat foi deletado.",
+    icon: "i-lucide-trash",
+  });
+
+  refreshChats();
+
+  if (route.params.id !== id) return;
+
+  navigateTo("/");
+}
 </script>
 
 <template>
@@ -53,7 +118,7 @@ const items = computed(() => []);
           orientation="vertical"
           :ui="{ link: 'overflow-hidden' }"
         >
-          <template #item-trailing="{ item }">
+          <template #chat-trailing="{ item }">
             <div
               class="flex -mr-1.25 translate-x-full group-hover:translate-x-0 transition-transform"
             >
@@ -61,9 +126,10 @@ const items = computed(() => []);
                 icon="i-lucide-x"
                 color="neutral"
                 variant="ghost"
-                size="xs"
+                size="md"
                 class="text-muted hover:text-primary hover:bg-accented/50 focus-visible:bg-accented/50 p-0.5"
                 tabindex="-1"
+                @click="deleteChat(item.id)"
               />
             </div>
           </template>
@@ -95,6 +161,7 @@ const items = computed(() => []);
             },
           ],
         },
+        ...groups,
       ]"
     />
 

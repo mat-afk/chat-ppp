@@ -2,6 +2,18 @@
 const input = ref("");
 const loading = ref(false);
 
+async function onSubmit() {
+  loading.value = true;
+
+  const chat = await $fetch("/api/chats", {
+    method: "POST",
+    body: { input: input.value },
+  });
+
+  await refreshNuxtData("chats");
+  navigateTo(`/chats/${chat?.id}`);
+}
+
 const quickChats = [
   {
     label: "Por que '42' é a resposta do universo?",
@@ -26,6 +38,7 @@ const quickChats = [
           class="[view-transition-name:chat-prompt]"
           variant="subtle"
           placeholder="Escreva sua mensagem aqui..."
+          @submit="onSubmit"
         >
           <UChatPromptSubmit color="neutral" />
         </UChatPrompt>
