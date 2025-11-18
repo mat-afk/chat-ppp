@@ -1,12 +1,8 @@
-import z from "zod";
 import { prisma } from "../lib/prisma";
-
-const bodySchema = z.object({
-  input: z.string(),
-});
+import { inputSchema } from "../lib/zod";
 
 export default defineEventHandler(async (event) => {
-  const { input } = await readValidatedBody(event, bodySchema.parse);
+  const { input } = await readValidatedBody(event, inputSchema.parse);
 
   const { user } = await requireUserSession(event);
 
@@ -18,7 +14,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const chat = await prisma.chat.create({
-    data: { title: input, guestId: user.id, lastMessageSender: "GUEST" },
+    data: { title: "Novo chat", guestId: user.id, lastMessageSender: "GUEST" },
   });
 
   await prisma.message.create({
