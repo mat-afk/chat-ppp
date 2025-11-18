@@ -77,7 +77,6 @@ const items = computed(() => []);
           :avatar="{
             icon: 'i-lucide-user',
           }"
-          to="/a"
           class="w-full"
         />
       </template>
@@ -99,8 +98,9 @@ const items = computed(() => []);
       ]"
     />
 
-    <main class="size-full flex items-center justify-center">
-      <div class="w-[90%] sm:w-[80%] lg:w-[70%]">
+    <main class="size-full flex flex-col items-center justify-center">
+      <DashboardNavbar class="w-full" />
+      <div class="flex-1 w-[90%] sm:w-[80%] lg:w-[70%]">
         <slot />
       </div>
     </main>
