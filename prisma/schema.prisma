@@ -9,7 +9,7 @@ datasource db {
 }
 
 model Performer {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   key       String   @unique
   createdAt DateTime @default(now())
 
@@ -19,7 +19,7 @@ model Performer {
 }
 
 model Guest {
-  id           Int      @id @default(autoincrement())
+  id           String   @id @default(uuid())
   sessionToken String   @unique
   createdAt    DateTime @default(now())
 
@@ -35,10 +35,10 @@ model Chat {
   createdAt DateTime   @default(now())
   assumedAt DateTime?
 
-  guestId Int
-  guest   Guest @relation(fields: [guestId], references: [id])
+  guestId String
+  guest   Guest  @relation(fields: [guestId], references: [id])
 
-  performerId Int?
+  performerId String?
   performer   Performer? @relation(fields: [performerId], references: [id])
 
   messages          Message[]

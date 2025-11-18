@@ -8,11 +8,7 @@ const bodySchema = z.object({
 export default defineEventHandler(async (event) => {
   const { input } = await readValidatedBody(event, bodySchema.parse);
 
-  const { user } = await getUserSession(event);
-
-  if (!user) {
-    throw createError({ statusCode: 401, message: "Credenciais inválidas." });
-  }
+  const { user } = await requireUserSession(event);
 
   if (user.type === "PERFORMER") {
     throw createError({
