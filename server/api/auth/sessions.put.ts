@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  await setUserSession(event, { user: { id: guest.id, type: "GUEST" } });
+  await replaceUserSession(event, { user: { id: guest.id, type: "GUEST" } });
 
   return guest;
 });

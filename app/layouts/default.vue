@@ -2,8 +2,9 @@
 import ModalConfirm from "~/components/ModalConfirm.vue";
 import ModalLogin from "~/components/ModalLogin.vue";
 import { useChats } from "~/composables/useChats";
+import { useGuest } from "~/composables/useGuest";
 
-const { user } = useUserSession();
+const { user, clear: clearSession, fetch: fetchSession } = useUserSession();
 const open = ref(false);
 
 const overlay = useOverlay();
@@ -70,6 +71,16 @@ async function deleteChat(id: string) {
   if (route.params.id !== id) return;
 
   navigateTo("/");
+}
+
+const { sessionize } = useGuest();
+
+async function logout() {
+  await sessionize();
+  await fetchSession();
+
+  await refreshChats();
+  await navigateTo("/");
 }
 
 const isPerformer = computed(() => user.value?.type === "PERFORMER");
@@ -151,7 +162,7 @@ watch(user, () => refreshChats());
           color="neutral"
           icon="i-lucide-log-out"
           class="w-full"
-          to="/logout"
+          @click="logout"
           >Sair</UButton
         >
         <UUser
