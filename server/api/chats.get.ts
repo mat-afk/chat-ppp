@@ -7,5 +7,7 @@ export default defineEventHandler(async (event) => {
     return await prisma.chat.findMany({ where: { guestId: user.id } });
   }
 
-  return await prisma.chat.findMany({ where: { performerId: user.id } });
+  return await prisma.chat.findMany({
+    where: { OR: [{ performerId: user.id }, { performerId: null }] },
+  });
 });

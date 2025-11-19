@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const route = useRoute();
-const toast = useToast();
 
 const { data: chat } = await useFetch(`/api/chats/${route.params.id}`, {
   cache: "force-cache",
@@ -57,15 +56,25 @@ const messages = computed<UIMessage[]>(() => {
   return messages;
 });
 
+const toast = useToast();
+
 function onSubmit(e: Event) {
   e.preventDefault();
 }
+
+const { isGuest } = useGuest();
 </script>
 
 <template>
-  <UDashboardPanel id="chat" class="relative" :ui="{ body: 'p-0 sm:p-0' }">
+  <UDashboardPanel id="chat" class="relative">
+    <template #header>
+      <DashboardNavbar />
+    </template>
+
     <template #body>
-      <UContainer class="flex-1 flex flex-col gap-4 sm:gap-6">
+      <UContainer
+        class="h-full flex-1 overflow-auto flex flex-col gap-4 sm:gap-6"
+      >
         <UChatMessages
           should-auto-scroll
           :messages="messages"
@@ -76,9 +85,11 @@ function onSubmit(e: Event) {
         <UChatPrompt
           v-model="input"
           variant="subtle"
-          class="sticky bottom-0 [view-transition-name:chat-prompt] rounded-b-none z-10"
           placeholder="Escreva sua mensagem aqui..."
+          :disabled="chat?.lastMessageSender === 'GUEST' && isGuest"
+          autofocus
           @submit="onSubmit"
+          class="sticky bottom-0 [view-transition-name:chat-prompt] rounded-b-none z-10"
         >
           <template #footer>
             <UChatPromptSubmit color="neutral" />

@@ -4,7 +4,6 @@ import ModalLogin from "~/components/ModalLogin.vue";
 import { useChats } from "~/composables/useChats";
 import { useGuest } from "~/composables/useGuest";
 
-const { user, clear: clearSession, fetch: fetchSession } = useUserSession();
 const open = ref(false);
 
 const overlay = useOverlay();
@@ -73,7 +72,8 @@ async function deleteChat(id: string) {
   navigateTo("/");
 }
 
-const { sessionize } = useGuest();
+const { isGuest, sessionize } = useGuest();
+const { fetch: fetchSession } = useUserSession();
 
 async function logout() {
   await sessionize();
@@ -83,8 +83,7 @@ async function logout() {
   await navigateTo("/");
 }
 
-const isPerformer = computed(() => user.value?.type === "PERFORMER");
-watch(user, () => refreshChats());
+watch(isGuest, () => refreshChats());
 </script>
 
 <template>
@@ -114,7 +113,7 @@ watch(user, () => refreshChats());
       <template #default="{ collapsed }">
         <div class="flex flex-col gap-1.5">
           <UButton
-            v-if="!isPerformer"
+            v-if="isGuest"
             v-bind="
               collapsed ? { icon: 'i-lucide-plus' } : { label: 'Nova conversa' }
             "
@@ -137,7 +136,7 @@ watch(user, () => refreshChats());
           orientation="vertical"
           :ui="{ link: 'overflow-hidden' }"
         >
-          <template v-if="!isPerformer" #chat-trailing="{ item }">
+          <template v-if="isGuest" #chat-trailing="{ item }">
             <div
               class="flex -mr-1.25 translate-x-full group-hover:translate-x-0 transition-transform"
             >
@@ -156,8 +155,18 @@ watch(user, () => refreshChats());
       </template>
 
       <template #footer="{ collapsed }">
+        <UUser
+          v-if="isGuest"
+          :name="collapsed ? '' : 'Anônimo'"
+          :description="collapsed ? '' : 'Quer se juntar a nós?'"
+          :avatar="{
+            icon: 'i-lucide-user',
+          }"
+          class="w-full cursor-pointer opacity-0 hover:opacity-100 transition"
+          @click="loginModal.open()"
+        />
         <UButton
-          v-if="isPerformer"
+          v-else
           variant="soft"
           color="neutral"
           icon="i-lucide-log-out"
@@ -165,16 +174,6 @@ watch(user, () => refreshChats());
           @click="logout"
           >Sair</UButton
         >
-        <UUser
-          v-else
-          :name="collapsed ? '' : 'Anônimo'"
-          :description="collapsed ? '' : 'Quer se juntar a nós?'"
-          :avatar="{
-            icon: 'i-lucide-user',
-          }"
-          class="w-full cursor-pointer"
-          @click="loginModal.open()"
-        />
       </template>
     </UDashboardSidebar>
 
@@ -195,11 +194,6 @@ watch(user, () => refreshChats());
       ]"
     />
 
-    <main class="size-full flex flex-col items-center justify-center">
-      <DashboardNavbar class="w-full" />
-      <div class="flex-1 w-[90%] sm:w-[80%] lg:w-[70%]">
-        <slot />
-      </div>
-    </main>
+    <slot />
   </UDashboardGroup>
 </template>

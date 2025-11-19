@@ -1,4 +1,7 @@
 export const useGuest = () => {
+  const { user } = useUserSession();
+  const isGuest = computed(() => user.value?.type === "GUEST");
+
   async function sessionize() {
     const existingSessionToken = localStorage.getItem("session-token");
 
@@ -16,6 +19,7 @@ export const useGuest = () => {
   }
 
   return {
+    isGuest,
     sessionize,
   };
 };

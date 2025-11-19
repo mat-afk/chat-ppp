@@ -21,15 +21,18 @@ const quickChats = [
   },
 ];
 
-const { user } = useUserSession();
-const isPerformer = computed(() => user.value?.type === "PERFORMER");
+const { isGuest } = useGuest();
 </script>
 
 <template>
-  <UDashboardPanel id="home" :ui="{ body: 'p-0 sm:p-0' }">
+  <UDashboardPanel id="home">
+    <template #header>
+      <DashboardNavbar />
+    </template>
+
     <template #body>
       <UContainer
-        v-if="isPerformer"
+        v-if="!isGuest"
         class="flex-1 flex flex-col justify-center text-center gap-4 sm:gap-6 py-8"
       >
         <h1 class="text-3xl sm:text-4xl text-highlighted text-center font-bold">
@@ -42,7 +45,7 @@ const isPerformer = computed(() => user.value?.type === "PERFORMER");
         class="flex-1 flex flex-col justify-center gap-4 sm:gap-6 py-8"
       >
         <h1 class="text-3xl sm:text-4xl text-highlighted font-bold">
-          Como posso te ajudar hoje?
+          Como posso ajudar?
         </h1>
 
         <UChatPrompt
