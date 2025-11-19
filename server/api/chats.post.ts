@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma";
-import { inputSchema } from "../lib/zod";
+import { prisma } from "~~/server/lib/prisma";
+import { inputSchema } from "~~/shared/lib/zod";
 
 export default defineEventHandler(async (event) => {
   const { input } = await readValidatedBody(event, inputSchema.parse);

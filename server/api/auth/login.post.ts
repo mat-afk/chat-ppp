@@ -1,13 +1,11 @@
 import { prisma } from "~~/server/lib/prisma";
-import { keySchema } from "~~/server/lib/zod";
+import { keySchema } from "~~/shared/lib/zod";
 
 export default defineEventHandler(async (event) => {
   const { key } = await readValidatedBody(event, keySchema.parse);
 
-  const hashedKey = await hashPassword(key);
-
   const performer = await prisma.performer.findUnique({
-    where: { key: hashedKey },
+    where: { key },
   });
 
   if (!performer) {
@@ -17,7 +15,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  await setUserSession(event, {
+  await replaceUserSession(event, {
     user: { id: performer.id, type: "PERFORMER" },
   });
 

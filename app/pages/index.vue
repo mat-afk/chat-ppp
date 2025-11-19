@@ -20,12 +20,25 @@ const quickChats = [
     icon: "i-lucide-orbit",
   },
 ];
+
+const { user } = useUserSession();
+const isPerformer = computed(() => user.value?.type === "PERFORMER");
 </script>
 
 <template>
   <UDashboardPanel id="home" :ui="{ body: 'p-0 sm:p-0' }">
     <template #body>
       <UContainer
+        v-if="isPerformer"
+        class="flex-1 flex flex-col justify-center text-center gap-4 sm:gap-6 py-8"
+      >
+        <h1 class="text-3xl sm:text-4xl text-highlighted text-center font-bold">
+          Responda a um chat para começar
+        </h1>
+      </UContainer>
+
+      <UContainer
+        v-else
         class="flex-1 flex flex-col justify-center gap-4 sm:gap-6 py-8"
       >
         <h1 class="text-3xl sm:text-4xl text-highlighted font-bold">

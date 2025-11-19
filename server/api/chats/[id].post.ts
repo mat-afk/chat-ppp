@@ -1,5 +1,5 @@
 import { Prisma, prisma } from "~~/server/lib/prisma";
-import { idSchema, inputSchema } from "~~/server/lib/zod";
+import { idSchema, inputSchema } from "~~/shared/lib/zod";
 
 export default defineEventHandler(async (event) => {
   const { user } = await requireUserSession(event);

@@ -71,6 +71,9 @@ async function deleteChat(id: string) {
 
   navigateTo("/");
 }
+
+const isPerformer = computed(() => user.value?.type === "PERFORMER");
+watch(user, () => refreshChats());
 </script>
 
 <template>
@@ -100,7 +103,7 @@ async function deleteChat(id: string) {
       <template #default="{ collapsed }">
         <div class="flex flex-col gap-1.5">
           <UButton
-            v-if="user && user.type === 'GUEST'"
+            v-if="!isPerformer"
             v-bind="
               collapsed ? { icon: 'i-lucide-plus' } : { label: 'Nova conversa' }
             "
@@ -123,7 +126,7 @@ async function deleteChat(id: string) {
           orientation="vertical"
           :ui="{ link: 'overflow-hidden' }"
         >
-          <template #chat-trailing="{ item }">
+          <template v-if="!isPerformer" #chat-trailing="{ item }">
             <div
               class="flex -mr-1.25 translate-x-full group-hover:translate-x-0 transition-transform"
             >
@@ -142,7 +145,15 @@ async function deleteChat(id: string) {
       </template>
 
       <template #footer="{ collapsed }">
-        <UButton v-if="user?.type === 'PERFORMER'" />
+        <UButton
+          v-if="isPerformer"
+          variant="soft"
+          color="neutral"
+          icon="i-lucide-log-out"
+          class="w-full"
+          to="/logout"
+          >Sair</UButton
+        >
         <UUser
           v-else
           :name="collapsed ? '' : 'Anônimo'"

@@ -1,5 +1,5 @@
 import { prisma } from "~~/server/lib/prisma";
-import { sessionTokenSchema } from "~~/server/lib/zod";
+import { sessionTokenSchema } from "~~/shared/lib/zod";
 
 async function getOrCreateGuest(sessionToken: string | undefined) {
   if (!sessionToken) {

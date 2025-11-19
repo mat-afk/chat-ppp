@@ -1,6 +1,8 @@
 export default defineNuxtPlugin(async (nuxtApp) => {
   const { loggedIn, user } = useUserSession();
 
+  console.log(loggedIn.value);
+
   if (loggedIn.value || (user.value && user.value.type === "PERFORMER")) return;
 
   const existingSessionToken = localStorage.getItem("session-token");
@@ -16,5 +18,4 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   );
 
   localStorage.setItem("session-token", sessionToken);
-  console.log(sessionToken);
 });

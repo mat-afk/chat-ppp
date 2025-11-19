@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const inputSchema = z.object({
-  input: z.string(),
+  input: z.string().min(1, { message: "Mensagem vazia." }),
 });
 
 export const idSchema = z.object({
@@ -13,5 +13,5 @@ export const sessionTokenSchema = z.object({
 });
 
 export const keySchema = z.object({
-  key: z.string(),
+  key: z.string().min(1, { message: "Chave inválida." }),
 });
