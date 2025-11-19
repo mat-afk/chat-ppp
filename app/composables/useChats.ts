@@ -4,6 +4,7 @@ interface Chat {
   id: string;
   label: string;
   icon: string;
+  isNew: boolean;
   createdAt: string;
 }
 

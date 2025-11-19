@@ -22,11 +22,12 @@ const { data: chats, refresh: refreshChats } = await useFetch("/api/chats", {
   key: "chats",
   transform: (data) =>
     data.map((chat) => ({
-      ...chat,
       id: chat.id,
       label: chat.title || "Sem título",
       to: `/chats/${chat.id}`,
       icon: "i-lucide-message-circle",
+      isNew: !chat.performerId,
+      createdAt: chat.createdAt,
     })),
 });
 
@@ -150,6 +151,11 @@ watch(isGuest, () => refreshChats());
                 @click="deleteChat(item.id)"
               />
             </div>
+          </template>
+          <template v-else #chat-trailing="{ item }">
+            <UBadge v-if="item.isNew" size="sm" variant="soft" class="uppercase"
+              >Novo</UBadge
+            >
           </template>
         </UNavigationMenu>
       </template>

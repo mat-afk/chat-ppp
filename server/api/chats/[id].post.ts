@@ -9,8 +9,11 @@ export default defineEventHandler(async (event) => {
 
   const where: Prisma.ChatWhereUniqueInput = { id };
 
-  if (user.type === "GUEST") where.guestId = user.id;
-  else where.performerId = user.id;
+  if (user.type === "GUEST") {
+    where.guestId = user.id;
+  } else {
+    where.OR = [{ performerId: user.id }, { performerId: null }];
+  }
 
   let chat = await prisma.chat.findUnique({
     where,
@@ -38,6 +41,7 @@ export default defineEventHandler(async (event) => {
   if (chat.status === "WAITING" && user.type === "PERFORMER") {
     data.performerId = user.id;
     data.assumedAt = new Date();
+    data.status = "IN_PROGRESS";
   }
 
   chat = await prisma.chat.update({

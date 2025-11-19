@@ -13,8 +13,10 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const firts10Words = input.split(" ").splice(0, 10).join(" ");
+
   const chat = await prisma.chat.create({
-    data: { title: "Sem título", guestId: user.id, lastMessageSender: "GUEST" },
+    data: { title: firts10Words, guestId: user.id, lastMessageSender: "GUEST" },
   });
 
   await prisma.message.create({
