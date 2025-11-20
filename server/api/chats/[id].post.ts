@@ -1,3 +1,4 @@
+import { clients } from "~~/server/global/clients";
 import { Prisma, prisma } from "~~/server/lib/prisma";
 import { idSchema, inputSchema } from "~~/shared/lib/zod";
 
@@ -30,7 +31,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  await prisma.message.create({
+  const message = await prisma.message.create({
     data: { content: input, sender: user.type, chatId: chat.id },
   });
 
@@ -55,6 +56,19 @@ export default defineEventHandler(async (event) => {
       statusCode: 500,
       message: "Erro no servidor.",
     });
+  }
+
+  let eventStream;
+  if (user.type === "GUEST") {
+    if (chat.performerId) {
+      eventStream = clients.get(chat.performerId)?.get(chat.id);
+    }
+  } else {
+    eventStream = clients.get(chat.guestId)?.get(chat.id);
+  }
+
+  if (eventStream) {
+    await eventStream.push(JSON.stringify(message));
   }
 
   return chat;

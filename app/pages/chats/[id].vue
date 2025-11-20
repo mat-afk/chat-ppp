@@ -1,10 +1,25 @@
 <script setup lang="ts">
+import type { Message, MessageSender } from "~~/server/lib/prisma";
+
 const route = useRoute();
+const { isGuest } = useGuest();
+const { user } = useUserSession();
 
 const { data: chat, refresh: refreshChat } = await useFetch(
-  `/api/chats/${route.params.id}`,
+  `/api/chats/${route.params.id}`
+);
+
+const { data: newMessage } = useEventSource(
+  `http://localhost:3000/sse?userId=${user.value?.id}&chatId=${route.params.id}`,
+  [],
   {
-    cache: "force-cache",
+    serializer: {
+      read: (raw?: string) => {
+        const object = JSON.parse(raw || "");
+
+        return { ...object, sentAt: object.sentAt } as Message;
+      },
+    },
   }
 );
 
@@ -28,15 +43,20 @@ interface UIMessage {
   class?: string;
 }
 
-const submitted = ref(false);
+const messages = ref<UIMessage[]>([]);
+const lastSender = ref<MessageSender>("GUEST");
 
-const messages = computed<UIMessage[]>(() => {
-  if (!chat.value) return [];
+const submitted = computed(() => lastSender.value === user.value?.type);
 
-  const messages = chat.value.messages.map<UIMessage>((message) => {
+watchEffect(() => {
+  if (!chat.value) return;
+
+  messages.value = chat.value.messages.map<UIMessage>((message) => {
+    const role = message.sender === user.value?.type ? "user" : "assistant";
+
     return {
       id: message.id.toString(),
-      role: message.sender === "GUEST" ? "user" : "assistant",
+      role,
       parts: [
         {
           type: "text",
@@ -46,11 +66,27 @@ const messages = computed<UIMessage[]>(() => {
     };
   });
 
-  if (chat.value.lastMessageSender === "GUEST" && isGuest.value) {
-    submitted.value = true;
-  }
+  lastSender.value = chat.value.lastMessageSender;
+});
 
-  return messages;
+watch(newMessage, (message) => {
+  if (!message) return;
+  if (!user.value) return;
+
+  const role = message.sender === user.value.type ? "user" : "assistant";
+
+  messages.value.push({
+    id: message.id.toString(),
+    role,
+    parts: [
+      {
+        type: "text",
+        text: message.content,
+      },
+    ],
+  });
+
+  lastSender.value = message.sender;
 });
 
 const toast = useToast();
@@ -79,9 +115,6 @@ async function onSubmit(e: Event) {
   await refreshChat();
   await refreshNuxtData("chats");
 }
-
-const { isGuest } = useGuest();
-const { user } = useUserSession();
 </script>
 
 <template>
@@ -94,30 +127,32 @@ const { user } = useUserSession();
       <UContainer
         class="h-full flex-1 overflow-auto flex flex-col gap-4 sm:gap-6"
       >
-        <UChatMessages
-          should-auto-scroll
-          :messages="messages"
-          :status="submitted ? 'submitted' : 'ready'"
-          :spacing-offset="160"
-          class="lg:pt-(--ui-header-height) pb-4 sm:pb-6"
-        >
-          <template #indicator>
-            <UButton
-              class="px-0"
-              color="neutral"
-              variant="link"
-              loading
-              loading-icon="i-lucide-loader"
-              label="Raciocinando..."
-            />
-          </template>
-        </UChatMessages>
+        <ClientOnly>
+          <UChatMessages
+            should-auto-scroll
+            :messages="messages"
+            :status="submitted ? 'submitted' : 'ready'"
+            :spacing-offset="160"
+            class="lg:pt-(--ui-header-height) pb-4 sm:pb-6"
+          >
+            <template #indicator>
+              <UButton
+                class="px-0"
+                color="neutral"
+                variant="link"
+                loading
+                loading-icon="i-lucide-loader"
+                :label="isGuest ? 'Raciocinando...' : 'Aguardando usuário...'"
+              />
+            </template>
+          </UChatMessages>
+        </ClientOnly>
 
         <UChatPrompt
           v-model="input"
           variant="subtle"
           placeholder="Escreva sua mensagem aqui..."
-          :disabled="chat?.lastMessageSender === user?.type"
+          :disabled="submitted"
           autofocus
           @submit="onSubmit"
           class="sticky bottom-0 [view-transition-name:chat-prompt] rounded-b-none z-10"
