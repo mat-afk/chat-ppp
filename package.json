@@ -13,6 +13,7 @@
     "@nuxt/ui": "^4.1.0",
     "@prisma/client": "^6.19.0",
     "@vueuse/nuxt": "14.0.0",
+    "crossws": "^0.4.1",
     "date-fns": "^4.1.0",
     "nuxt": "^4.2.1",
     "nuxt-auth-utils": "0.5.25",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.73",
+    "@types/node": "^24.10.1",
     "prisma": "^6.19.0"
   }
 }

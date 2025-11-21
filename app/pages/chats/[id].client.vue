@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Message, MessageSender } from "~~/server/lib/prisma";
+import type { MessageSender } from "~~/server/lib/prisma";
 
 const route = useRoute();
 const { isGuest } = useGuest();
@@ -9,19 +9,7 @@ const { data: chat, refresh: refreshChat } = await useFetch(
   `/api/chats/${route.params.id}`
 );
 
-const { data: newMessage } = useEventSource(
-  `http://localhost:3000/sse?userId=${user.value?.id}&chatId=${route.params.id}`,
-  [],
-  {
-    serializer: {
-      read: (raw?: string) => {
-        const object = JSON.parse(raw || "");
-
-        return { ...object, sentAt: object.sentAt } as Message;
-      },
-    },
-  }
-);
+const { $socket } = useNuxtApp();
 
 if (!chat.value) {
   throw createError({
@@ -43,15 +31,12 @@ interface UIMessage {
   class?: string;
 }
 
-const messages = ref<UIMessage[]>([]);
-const lastSender = ref<MessageSender>("GUEST");
+const messages = computed<UIMessage[]>(() => {
+  if (!chat.value) return [];
 
-const submitted = computed(() => lastSender.value === user.value?.type);
+  lastSender.value = chat.value.lastMessageSender;
 
-watchEffect(() => {
-  if (!chat.value) return;
-
-  messages.value = chat.value.messages.map<UIMessage>((message) => {
+  return chat.value.messages.map<UIMessage>((message) => {
     const role = message.sender === user.value?.type ? "user" : "assistant";
 
     return {
@@ -65,29 +50,10 @@ watchEffect(() => {
       ],
     };
   });
-
-  lastSender.value = chat.value.lastMessageSender;
 });
+const lastSender = ref<MessageSender>("GUEST");
 
-watch(newMessage, (message) => {
-  if (!message) return;
-  if (!user.value) return;
-
-  const role = message.sender === user.value.type ? "user" : "assistant";
-
-  messages.value.push({
-    id: message.id.toString(),
-    role,
-    parts: [
-      {
-        type: "text",
-        text: message.content,
-      },
-    ],
-  });
-
-  lastSender.value = message.sender;
-});
+const submitted = computed(() => lastSender.value === user.value?.type);
 
 const toast = useToast();
 
@@ -115,6 +81,26 @@ async function onSubmit(e: Event) {
   await refreshChat();
   await refreshNuxtData("chats");
 }
+
+watch($socket.data, async (data) => {
+  if (!data) return;
+  if (!user.value) return;
+
+  const { event, payload } = data;
+
+  if (event !== "new-message" && event !== "chat-deleted") return;
+
+  if (event === "new-message") {
+    if (payload.chatId !== route.params.id) return;
+
+    await refreshChat();
+    return;
+  }
+
+  if (payload.id !== route.params.id) return;
+
+  await navigateTo("/");
+});
 </script>
 
 <template>
@@ -127,26 +113,24 @@ async function onSubmit(e: Event) {
       <UContainer
         class="h-full flex-1 overflow-auto flex flex-col gap-4 sm:gap-6"
       >
-        <ClientOnly>
-          <UChatMessages
-            should-auto-scroll
-            :messages="messages"
-            :status="submitted ? 'submitted' : 'ready'"
-            :spacing-offset="160"
-            class="lg:pt-(--ui-header-height) pb-4 sm:pb-6"
-          >
-            <template #indicator>
-              <UButton
-                class="px-0"
-                color="neutral"
-                variant="link"
-                loading
-                loading-icon="i-lucide-loader"
-                :label="isGuest ? 'Raciocinando...' : 'Aguardando usuário...'"
-              />
-            </template>
-          </UChatMessages>
-        </ClientOnly>
+        <UChatMessages
+          should-auto-scroll
+          :messages="messages"
+          :status="submitted ? 'submitted' : 'ready'"
+          :spacing-offset="160"
+          class="lg:pt-(--ui-header-height) pb-4 sm:pb-6"
+        >
+          <template #indicator>
+            <UButton
+              class="px-0"
+              color="neutral"
+              variant="link"
+              loading
+              loading-icon="i-lucide-loader"
+              :label="isGuest ? 'Raciocinando...' : 'Aguardando usuário...'"
+            />
+          </template>
+        </UChatMessages>
 
         <UChatPrompt
           v-model="input"

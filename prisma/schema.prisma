@@ -34,6 +34,7 @@ model Chat {
   status    ChatStatus @default(WAITING)
   createdAt DateTime   @default(now())
   assumedAt DateTime?
+  updatedAt DateTime   @default(now()) @updatedAt
 
   guestId String
   guest   Guest  @relation(fields: [guestId], references: [id])

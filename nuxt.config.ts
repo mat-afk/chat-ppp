@@ -9,4 +9,9 @@ export default defineNuxtConfig({
       websocket: true,
     },
   },
+  runtimeConfig: {
+    public: {
+      nodeEnv: process.env.NODE_END ?? "dev",
+    },
+  },
 });

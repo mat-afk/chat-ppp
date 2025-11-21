@@ -1,6 +1,7 @@
-import { clients } from "~~/server/global/clients";
+import { connections } from "~~/server/global/clients";
 import { Prisma, prisma } from "~~/server/lib/prisma";
 import { idSchema, inputSchema } from "~~/shared/lib/zod";
+import { WebSocketData } from "~~/shared/types";
 
 export default defineEventHandler(async (event) => {
   const { user } = await requireUserSession(event);
@@ -37,6 +38,7 @@ export default defineEventHandler(async (event) => {
 
   const data: Prisma.ChatUncheckedUpdateInput = {
     lastMessageSender: user.type,
+    updatedAt: new Date(),
   };
 
   if (chat.status === "WAITING" && user.type === "PERFORMER") {
@@ -58,17 +60,20 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  let eventStream;
-  if (user.type === "GUEST") {
-    if (chat.performerId) {
-      eventStream = clients.get(chat.performerId)?.get(chat.id);
-    }
-  } else {
-    eventStream = clients.get(chat.guestId)?.get(chat.id);
+  const receiverId = user.type === "GUEST" ? chat.performerId : chat.guestId;
+
+  if (!receiverId) {
+    return chat;
   }
 
-  if (eventStream) {
-    await eventStream.push(JSON.stringify(message));
+  const peer = connections.get(receiverId);
+
+  if (peer) {
+    const wsData: WebSocketData = {
+      event: "new-message",
+      payload: message,
+    };
+    peer.send(wsData);
   }
 
   return chat;

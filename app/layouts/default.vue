@@ -1,3 +1,21 @@
+<script lang="ts">
+function transform(chat: {
+  id: string;
+  title: string;
+  performerId: string | null;
+  updatedAt: string;
+}) {
+  return {
+    id: chat.id,
+    label: chat.title || "Sem título",
+    to: `/chats/${chat.id}`,
+    icon: "i-lucide-message-circle",
+    isNew: !chat.performerId,
+    updatedAt: chat.updatedAt,
+  };
+}
+</script>
+
 <script setup lang="ts">
 import ModalConfirm from "~/components/ModalConfirm.vue";
 import ModalLogin from "~/components/ModalLogin.vue";
@@ -5,7 +23,6 @@ import { useChats } from "~/composables/useChats";
 import { useGuest } from "~/composables/useGuest";
 
 const open = ref(false);
-
 const overlay = useOverlay();
 
 const deleteModal = overlay.create(ModalConfirm, {
@@ -18,18 +35,12 @@ const deleteModal = overlay.create(ModalConfirm, {
 
 const loginModal = overlay.create(ModalLogin);
 
-const { data: chats, refresh: refreshChats } = await useFetch("/api/chats", {
+const { data, refresh: refreshChats } = await useFetch("/api/chats", {
   key: "chats",
-  transform: (data) =>
-    data.map((chat) => ({
-      id: chat.id,
-      label: chat.title || "Sem título",
-      to: `/chats/${chat.id}`,
-      icon: "i-lucide-message-circle",
-      isNew: !chat.performerId,
-      createdAt: chat.createdAt,
-    })),
+  transform: (data) => data.map((chat) => transform(chat)),
 });
+
+const chats = computed<typeof data.value>(() => data.value);
 
 const { groups } = useChats(chats);
 
@@ -66,11 +77,11 @@ async function deleteChat(id: string) {
     icon: "i-lucide-trash",
   });
 
-  refreshChats();
+  await refreshChats();
 
   if (route.params.id !== id) return;
 
-  navigateTo("/");
+  await navigateTo("/");
 }
 
 const { isGuest, sessionize } = useGuest();
@@ -80,11 +91,21 @@ async function logout() {
   await sessionize();
   await fetchSession();
 
-  await refreshChats();
   await navigateTo("/");
 }
 
-watch(isGuest, () => refreshChats());
+watch(isGuest, async () => await refreshChats());
+
+const { $socket } = useNuxtApp();
+
+onMounted(() => {
+  watch($socket.data, async (data) => {
+    if (!data) return;
+    if (!chats.value) return;
+
+    await refreshChats();
+  });
+});
 </script>
 
 <template>

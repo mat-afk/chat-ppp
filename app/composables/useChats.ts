@@ -5,7 +5,7 @@ interface Chat {
   label: string;
   icon: string;
   isNew: boolean;
-  createdAt: string;
+  updatedAt: string;
 }
 
 export function useChats(chats: Ref<Chat[] | undefined>) {
@@ -19,8 +19,12 @@ export function useChats(chats: Ref<Chat[] | undefined>) {
     const oneWeekAgo = subMonths(new Date(), 0.25);
     const oneMonthAgo = subMonths(new Date(), 1);
 
-    chats.value?.forEach((chat) => {
-      const chatDate = new Date(chat.createdAt);
+    const sortedChats = chats.value?.sort(
+      (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
+    );
+
+    sortedChats?.forEach((chat) => {
+      const chatDate = new Date(chat.updatedAt);
 
       if (isToday(chatDate)) {
         today.push(chat);

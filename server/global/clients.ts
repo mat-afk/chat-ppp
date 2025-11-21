@@ -1,1 +1,3 @@
-export const clients = new Map<string, Map<string, any>>();
+import { Peer } from "crossws";
+
+export const connections = new Map<string, Peer>();

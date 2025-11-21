@@ -11,7 +11,7 @@ async function onSubmit() {
   });
 
   await refreshNuxtData("chats");
-  navigateTo(`/chats/${chat?.id}`);
+  await navigateTo(`/chats/${chat?.id}`);
 }
 
 const quickChats = [
