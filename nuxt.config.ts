@@ -8,5 +8,8 @@ export default defineNuxtConfig({
     experimental: {
       websocket: true,
     },
+    replace: {
+      "import * as process": "import * as processUnused",
+    },
   },
 });
