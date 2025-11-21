@@ -11,5 +11,9 @@ export default defineNuxtConfig({
     replace: {
       "import * as process": "import * as processUnused",
     },
+    preset: "vercel",
+    externals: {
+      inline: ["@prisma/client", "prisma"],
+    },
   },
 });
