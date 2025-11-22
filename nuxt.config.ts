@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
+    preset: process.env.SERVER_PRESET,
     experimental: {
       websocket: true,
     },
