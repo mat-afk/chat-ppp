@@ -7,6 +7,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   const socket = computed(() => {
     return useWebSocket<WebSocketData>(`/ws?userId=${user.value?.id}`, {
+      immediate: false,
       onMessage(_, event) {
         if (nuxtApp.$config.public.nodeEnv === "development") {
           console.log("[ws] message received: " + event);
@@ -17,10 +18,15 @@ export default defineNuxtPlugin((nuxtApp) => {
     });
   });
 
+  watch(user, () => socket.value.open(), {
+    deep: true,
+    immediate: true,
+  });
+
   return {
     provide: {
       socket: {
-        ...socket.value,
+        ...socket,
         data,
       },
     },
