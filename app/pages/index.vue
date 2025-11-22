@@ -1,9 +1,11 @@
 <script setup lang="ts">
 const input = ref("");
-const loading = ref(false);
+const submitted = ref(false);
 
 async function onSubmit() {
-  loading.value = true;
+  if (submitted.value) return;
+
+  submitted.value = true;
 
   const chat = await $fetch("/api/chats", {
     method: "POST",
@@ -50,7 +52,8 @@ const { isGuest } = useGuest();
 
         <UChatPrompt
           v-model="input"
-          :status="loading ? 'streaming' : 'ready'"
+          :status="submitted ? 'streaming' : 'ready'"
+          :disabled="submitted"
           class="[view-transition-name:chat-prompt]"
           variant="subtle"
           placeholder="Escreva sua mensagem aqui..."
