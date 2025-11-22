@@ -12,5 +12,8 @@ export default defineWebSocketHandler({
     console.log(
       `[ws] a user with id ${userId} connected with socket ${peer.id}`
     );
+    console.log(
+      "[ws] connected peers: " + connections.keys().toArray().join(", ")
+    );
   },
 });
