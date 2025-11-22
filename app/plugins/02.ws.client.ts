@@ -42,7 +42,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   return {
     provide: {
       socket: {
-        socket,
+        ...socket.value,
         data,
         connect,
       },
