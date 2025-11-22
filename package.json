@@ -5,8 +5,8 @@
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "build": "pnpm db:generate && pnpm db:migrate && nuxt build",
-    "dev": "pnpm db:generate && pnpm db:migrate && nuxt dev",
+    "build": "npm run db:generate && npm run db:migrate && nuxt build",
+    "dev": "npm run db:generate && npm run db:migrate && nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
