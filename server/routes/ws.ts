@@ -16,4 +16,17 @@ export default defineWebSocketHandler({
       "[ws] connected peers: " + connections.keys().toArray().join(", ")
     );
   },
+  close(peer) {
+    let userId: string | undefined;
+
+    connections.forEach((value, key) => {
+      if (value.id === peer.id) {
+        userId = key;
+      }
+    });
+
+    if (userId) {
+      connections.delete(userId);
+    }
+  },
 });

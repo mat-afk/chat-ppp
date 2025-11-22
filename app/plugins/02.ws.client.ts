@@ -20,6 +20,10 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         data.value = JSON.parse(event.data);
       },
+      autoReconnect: {
+        retries: 3,
+        delay: 2000,
+      },
     });
   }
 
