@@ -5,5 +5,5 @@ export default defineNuxtPlugin(async (_) => {
 
   if (loggedIn.value || (user.value && user.value.type === "PERFORMER")) return;
 
-  useGuest().sessionize();
+  await useGuest().sessionize();
 });
