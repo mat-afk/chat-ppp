@@ -20,7 +20,10 @@ export default defineNuxtConfig({
       "import * as process": "import * as processUnused",
     },
     externals: {
-      inline: ["@prisma/client", "prisma", "pg-native"],
+      inline: ["@prisma/client", "prisma"],
+    },
+    rollupConfig: {
+      external: ["pg-native"],
     },
   },
 });
