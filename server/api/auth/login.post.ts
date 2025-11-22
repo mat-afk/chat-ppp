@@ -1,11 +1,13 @@
-import { prisma } from "~~/server/lib/prisma";
+import { eq, tables, useDrizzle } from "~~/server/utils/drizzle";
 import { keySchema } from "~~/shared/lib/zod";
 
 export default defineEventHandler(async (event) => {
   const { key } = await readValidatedBody(event, keySchema.parse);
 
-  const performer = await prisma.performer.findUnique({
-    where: { key },
+  const db = useDrizzle();
+
+  const performer = await db.query.performers.findFirst({
+    where: eq(tables.performers.key, key),
   });
 
   if (!performer) {

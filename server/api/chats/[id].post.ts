@@ -1,5 +1,6 @@
 import { connections } from "~~/server/global/clients";
-import { Prisma, prisma } from "~~/server/lib/prisma";
+import { Chat, eq, tables, useDrizzle } from "~~/server/utils/drizzle";
+import { ensureUserIsParticipantOfChat } from "~~/server/utils/query";
 import { idSchema, inputSchema } from "~~/shared/lib/zod";
 import { WebSocketData } from "~~/shared/types";
 
@@ -9,17 +10,9 @@ export default defineEventHandler(async (event) => {
   const { id } = await getValidatedRouterParams(event, idSchema.parse);
   const { input } = await readValidatedBody(event, inputSchema.parse);
 
-  const where: Prisma.ChatWhereUniqueInput = { id };
+  const db = useDrizzle();
 
-  if (user.type === "GUEST") {
-    where.guestId = user.id;
-  } else {
-    where.OR = [{ performerId: user.id }, { performerId: null }];
-  }
-
-  let chat = await prisma.chat.findUnique({
-    where,
-  });
+  let chat = await ensureUserIsParticipantOfChat(user, id);
 
   if (!chat) {
     throw createError({ statusCode: 404, message: "Chat não encontrado." });
@@ -32,11 +25,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const message = await prisma.message.create({
-    data: { content: input, sender: user.type, chatId: chat.id },
-  });
+  const [message] = await db
+    .insert(tables.messages)
+    .values({ content: input, sender: user.type, chatId: chat.id })
+    .returning();
 
-  const data: Prisma.ChatUncheckedUpdateInput = {
+  const data: Partial<Chat> = {
     lastMessageSender: user.type,
     updatedAt: new Date(),
   };
@@ -47,13 +41,13 @@ export default defineEventHandler(async (event) => {
     data.status = "IN_PROGRESS";
   }
 
-  chat = await prisma.chat.update({
-    data: data,
-    where: { id: chat.id },
-    include: { messages: { orderBy: { sentAt: "asc" } } },
-  });
+  const [updatedChat] = await db
+    .update(tables.chats)
+    .set(data)
+    .where(eq(tables.chats.id, id))
+    .returning();
 
-  if (!chat) {
+  if (!updatedChat) {
     throw createError({
       statusCode: 500,
       message: "Erro no servidor.",

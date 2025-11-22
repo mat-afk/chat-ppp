@@ -1,6 +1,6 @@
-import { prisma } from "~~/server/lib/prisma";
+import { connections } from "~~/server/global/clients";
+import { tables, useDrizzle } from "~~/server/utils/drizzle";
 import { inputSchema } from "~~/shared/lib/zod";
-import { connections } from "../global/clients";
 import { WebSocketData } from "~~/shared/types";
 
 export default defineEventHandler(async (event) => {
@@ -17,16 +17,23 @@ export default defineEventHandler(async (event) => {
 
   const firts10Words = input.split(" ").splice(0, 10).join(" ");
 
-  const chat = await prisma.chat.create({
-    data: { title: firts10Words, guestId: user.id, lastMessageSender: "GUEST" },
-  });
+  const db = useDrizzle();
 
-  await prisma.message.create({
-    data: { content: input, sender: "GUEST", chatId: chat.id },
-  });
+  const [chat] = await db
+    .insert(tables.chats)
+    .values({
+      title: firts10Words,
+      guestId: user.id,
+      lastMessageSender: "GUEST",
+    })
+    .returning();
+
+  await db
+    .insert(tables.messages)
+    .values({ content: input, sender: "GUEST", chatId: chat.id });
 
   const targetsIds = new Set([user.id]);
-  const performers = await prisma.performer.findMany();
+  const performers = await db.query.performers.findMany();
 
   for (const performer of performers) {
     targetsIds.add(performer.id);

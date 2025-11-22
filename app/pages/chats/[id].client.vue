@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MessageSender } from "~~/server/lib/prisma";
+import type { MessageSender } from "~~/server/utils/drizzle";
 
 const route = useRoute();
 const { isGuest } = useGuest();

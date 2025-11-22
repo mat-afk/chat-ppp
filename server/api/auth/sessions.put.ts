@@ -1,18 +1,34 @@
-import { prisma } from "~~/server/lib/prisma";
+import { eq, tables, useDrizzle } from "~~/server/utils/drizzle";
 import { sessionTokenSchema } from "~~/shared/lib/zod";
 
 async function getOrCreateGuest(sessionToken: string | undefined) {
+  const db = useDrizzle();
+
   if (!sessionToken) {
     const token = Date.now() + "_" + crypto.randomUUID();
 
-    return await prisma.guest.create({ data: { sessionToken: token } });
+    const [guest] = await db
+      .insert(tables.guests)
+      .values({ sessionToken: token })
+      .returning();
+
+    return guest;
   }
 
-  const guest = prisma.guest.findUnique({ where: { sessionToken } });
+  let guest = await db.query.guests.findFirst({
+    where: eq(tables.guests.sessionToken, sessionToken),
+  });
 
   if (guest) return guest;
 
-  return await prisma.guest.create({ data: { sessionToken } });
+  [guest] = await db
+    .insert(tables.guests)
+    .values({
+      sessionToken,
+    })
+    .returning();
+
+  return guest;
 }
 
 export default defineEventHandler(async (event) => {

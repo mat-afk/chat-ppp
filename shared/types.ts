@@ -1,9 +1,9 @@
-import { Prisma } from "~~/server/lib/prisma";
+import type { Message, Chat } from "~~/server/utils/drizzle";
 
 export type SessionType = "GUEST" | "PERFORMER";
 
-export type NewMessagePayload = Prisma.MessageModel;
-export type ChatPayload = Prisma.ChatModel;
+export type NewMessagePayload = Message;
+export type ChatPayload = Chat;
 
 export type WebSocketData =
   | { event: "new-message"; payload: NewMessagePayload }

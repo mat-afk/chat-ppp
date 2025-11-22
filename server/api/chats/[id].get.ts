@@ -1,4 +1,4 @@
-import { prisma, Prisma } from "~~/server/lib/prisma";
+import { ensureUserIsParticipantOfChat } from "~~/server/utils/query";
 import { idSchema } from "~~/shared/lib/zod";
 
 export default defineEventHandler(async (event) => {
@@ -6,15 +6,7 @@ export default defineEventHandler(async (event) => {
 
   const { id } = await getValidatedRouterParams(event, idSchema.parse);
 
-  const where: Prisma.ChatWhereUniqueInput = { id };
-
-  if (user.type === "GUEST") where.guestId = user.id;
-  else where.OR = [{ performerId: user.id }, { performerId: null }];
-
-  const chat = await prisma.chat.findUnique({
-    where,
-    include: { messages: { orderBy: { sentAt: "asc" } } },
-  });
+  const chat = await ensureUserIsParticipantOfChat(user, id);
 
   if (!chat) {
     throw createError({ statusCode: 404, message: "Chat não encontrado." });
